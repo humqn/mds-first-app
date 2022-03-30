@@ -12,6 +12,7 @@ import { ColorSchemeName, Pressable } from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
+import LoginScreen from '../screens/Login';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import TabOneScreen from '../screens/TabOneScreen';
@@ -34,9 +35,10 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
+const isLogged = false;
 function RootNavigator() {
-  return (
+
+  return isLogged ?
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
@@ -44,7 +46,10 @@ function RootNavigator() {
         <Stack.Screen name="Modal" component={ModalScreen} />
       </Stack.Group>
     </Stack.Navigator>
-  );
+  :
+  <Stack.Navigator>
+    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+  </Stack.Navigator>
 }
 
 /**
