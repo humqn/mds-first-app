@@ -5,6 +5,9 @@ import { Button } from 'react-native-elements';
 import LoginInput from './LoginInput';
 import PasswordInput from './PasswordInput';
 import * as Yup from "yup";
+import { useDispatch } from 'react-redux';
+import { useLoginMutation } from '../../../services/api/auth';
+import { set_jwt } from '../../../store/authSlice';
 
  const SignInSchema = Yup.object().shape({
    login: Yup.string()
@@ -16,7 +19,9 @@ import * as Yup from "yup";
 
 
 const LoginForm: FunctionComponent = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+    const [login, { isLoading }] = useLoginMutation();
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -25,7 +30,21 @@ const LoginForm: FunctionComponent = () => {
       <Formik
         initialValues={{ login: "", password: "" }}
         onSubmit={values => {
-          setIsLoading(true);
+          setLoading(true);
+          login({
+            username: values.login,
+            password: values.password
+          })
+          .unwrap()
+          .then(data => {
+            setLoading(false);
+            dispatch(set_jwt(data.access_token));
+          }).catch((error) => {
+            console.log(error);
+            setLoading(false);
+          })
+
+
         }}
         validationSchema={SignInSchema}
       >
@@ -33,13 +52,13 @@ const LoginForm: FunctionComponent = () => {
         {
           if(errors.login || errors.password)
           {
-            setIsLoading(false);
+            setLoading(false);
           }
           return (
           <>
             <LoginInput  />
             <PasswordInput />
-            <Button onPress={() => submitForm()} title={'Connexion'} loading={isLoading} />
+            <Button onPress={() => submitForm()} title={'Connexion'} loading={loading} />
           </>)
         }
         }

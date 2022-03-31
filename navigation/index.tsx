@@ -9,6 +9,8 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { ColorSchemeName, Pressable } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
@@ -17,8 +19,11 @@ import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import TabOneScreen from '../screens/TabOneScreen';
 import TabTwoScreen from '../screens/TabTwoScreen';
+import { RootState } from '../store';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import * as SecureStore from 'expo-secure-store';
+import { set_jwt } from '../store/authSlice';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -35,10 +40,17 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const isLogged = false;
 function RootNavigator() {
+  const jwt = useSelector((state : RootState) => state.jwt);
+  const dispatch = useDispatch();
+  /* Get jwt from localStorage and mount it in Redux Store */
+  SecureStore.getItemAsync('jwt').then((jwt) => {
+    if (jwt) {
+      dispatch(set_jwt(jwt))
+    }
+  })
 
-  return isLogged ?
+  return jwt ?
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
